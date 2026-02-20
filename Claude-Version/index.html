@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UserVault — User Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">User<span>Vault</span></div>
+  <button class="btn btn-primary" onclick="openModal()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Add User
+  </button>
+</header>
+
+<!-- MAIN -->
+<main>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-pill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span><strong id="stat-total">0</strong> Total Users</span>
+    </div>
+    <div class="stat-pill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span><strong id="stat-admins">0</strong> Admins</span>
+    </div>
+    <div class="stat-pill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span><strong id="stat-showing">0</strong> Showing</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="search-input" id="searchInput" type="text"
+             placeholder="Search name, email, role…" oninput="renderCards()">
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="renderCards()">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="name-az">Name A→Z</option>
+      <option value="name-za">Name Z→A</option>
+    </select>
+  </div>
+
+  <!-- Grid -->
+  <div class="user-grid" id="userGrid"></div>
+</main>
+
+<!-- ADD / EDIT MODAL -->
+<div class="overlay" id="formOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add New User</div>
+      <button class="close-btn" onclick="closeModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <form id="userForm" novalidate>
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input class="form-input" id="fFirstName" type="text" placeholder="John">
+            <span class="error-msg" id="e-fFirstName">First name is required</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input class="form-input" id="fLastName" type="text" placeholder="Doe">
+            <span class="error-msg" id="e-fLastName">Last name is required</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input class="form-input" id="fEmail" type="email" placeholder="john@example.com">
+          <span class="error-msg" id="e-fEmail">Valid email address required</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" id="fPhone" type="tel" placeholder="+1 555 000 0000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role *</label>
+            <select class="form-input" id="fRole">
+              <option value="">Select role…</option>
+              <option value="Admin">Admin</option>
+              <option value="Editor">Editor</option>
+              <option value="Moderator">Moderator</option>
+              <option value="Viewer">Viewer</option>
+            </select>
+            <span class="error-msg" id="e-fRole">Please select a role</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department</label>
+          <input class="form-input" id="fDept" type="text" placeholder="Engineering, Marketing…">
+        </div>
+        <div class="form-group" id="pwGroup">
+          <label class="form-label">Password *</label>
+          <div class="pw-wrap">
+            <input class="form-input" id="fPassword" type="password" placeholder="Min 8 characters">
+            <button type="button" class="eye-btn" onclick="togglePw('fPassword',this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="error-msg" id="e-fPassword">Min 8 characters required</span>
+        </div>
+        <div class="form-group" id="pwConfGroup">
+          <label class="form-label">Confirm Password *</label>
+          <div class="pw-wrap">
+            <input class="form-input" id="fPasswordConf" type="password" placeholder="Repeat password">
+            <button type="button" class="eye-btn" onclick="togglePw('fPasswordConf',this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="error-msg" id="e-fPasswordConf">Passwords do not match</span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="overlay" id="confirmOverlay" onclick="handleConfirmOverlayClick(event)">
+  <div class="confirm-modal">
+    <div class="confirm-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6"/><path d="M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </div>
+    <div class="confirm-title">Delete User?</div>
+    <div class="confirm-msg" id="confirmMsg">This action cannot be undone.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        </svg>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon s" id="toastIcon">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <div>
+    <div class="toast-title" id="toastTitle">Success</div>
+    <div class="toast-msg" id="toastMsg"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UserVault — User Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">User<span>Vault</span></div>
+  <button class="btn btn-primary" onclick="openModal()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Add User
+  </button>
+</header>
+
+<!-- MAIN -->
+<main>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-pill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <span><strong id="stat-total">0</strong> Total Users</span>
+    </div>
+    <div class="stat-pill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span><strong id="stat-admins">0</strong> Admins</span>
+    </div>
+    <div class="stat-pill">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span><strong id="stat-showing">0</strong> Showing</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="search-input" id="searchInput" type="text"
+             placeholder="Search name, email, role…" oninput="renderCards()">
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="renderCards()">
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="name-az">Name A→Z</option>
+      <option value="name-za">Name Z→A</option>
+    </select>
+  </div>
+
+  <!-- Grid -->
+  <div class="user-grid" id="userGrid"></div>
+</main>
+
+<!-- ADD / EDIT MODAL -->
+<div class="overlay" id="formOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add New User</div>
+      <button class="close-btn" onclick="closeModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <form id="userForm" novalidate>
+      <div class="form-grid">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input class="form-input" id="fFirstName" type="text" placeholder="John">
+            <span class="error-msg" id="e-fFirstName">First name is required</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input class="form-input" id="fLastName" type="text" placeholder="Doe">
+            <span class="error-msg" id="e-fLastName">Last name is required</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input class="form-input" id="fEmail" type="email" placeholder="john@example.com">
+          <span class="error-msg" id="e-fEmail">Valid email address required</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" id="fPhone" type="tel" placeholder="+1 555 000 0000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Role *</label>
+            <select class="form-input" id="fRole">
+              <option value="">Select role…</option>
+              <option value="Admin">Admin</option>
+              <option value="Editor">Editor</option>
+              <option value="Moderator">Moderator</option>
+              <option value="Viewer">Viewer</option>
+            </select>
+            <span class="error-msg" id="e-fRole">Please select a role</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department</label>
+          <input class="form-input" id="fDept" type="text" placeholder="Engineering, Marketing…">
+        </div>
+        <div class="form-group" id="pwGroup">
+          <label class="form-label">Password *</label>
+          <div class="pw-wrap">
+            <input class="form-input" id="fPassword" type="password" placeholder="Min 8 characters">
+            <button type="button" class="eye-btn" onclick="togglePw('fPassword',this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="error-msg" id="e-fPassword">Min 8 characters required</span>
+        </div>
+        <div class="form-group" id="pwConfGroup">
+          <label class="form-label">Confirm Password *</label>
+          <div class="pw-wrap">
+            <input class="form-input" id="fPasswordConf" type="password" placeholder="Repeat password">
+            <button type="button" class="eye-btn" onclick="togglePw('fPasswordConf',this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="error-msg" id="e-fPasswordConf">Passwords do not match</span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="overlay" id="confirmOverlay" onclick="handleConfirmOverlayClick(event)">
+  <div class="confirm-modal">
+    <div class="confirm-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6"/><path d="M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </div>
+    <div class="confirm-title">Delete User?</div>
+    <div class="confirm-msg" id="confirmMsg">This action cannot be undone.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        </svg>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon s" id="toastIcon">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <div>
+    <div class="toast-title" id="toastTitle">Success</div>
+    <div class="toast-msg" id="toastMsg"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
