@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Management CRUD</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">UM</div>
+      <div>
+        <h1>User Management</h1>
+        <p>Frontend CRUD • localStorage</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input id="searchInput" class="input" type="text" placeholder="Search by name/email/role..." />
+
+      <!-- ✅ Custom Sort Dropdown -->
+      <div class="custom-select" id="sortDropdown">
+        <button type="button" class="select-btn" id="sortBtn">
+          <span id="sortLabel">Sort: Newest</span>
+          <span class="chev">▾</span>
+        </button>
+
+        <div class="select-menu" id="sortMenu">
+          <button type="button" class="select-item" data-value="newest">Sort: Newest</button>
+          <button type="button" class="select-item" data-value="oldest">Sort: Oldest</button>
+          <button type="button" class="select-item" data-value="nameAZ">Sort: Name A → Z</button>
+          <button type="button" class="select-item" data-value="nameZA">Sort: Name Z → A</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ✅ Form -->
+    <section class="card form-card">
+      <div class="form-head">
+        <div>
+          <h2 id="formTitle">Create User</h2>
+          <p class="sub">Add users with validation. Edit/Delete anytime.</p>
+        </div>
+        <div class="chip" id="modeChip">CREATE</div>
+      </div>
+
+      <form id="userForm" novalidate>
+        <input type="hidden" id="editId" value=""/>
+
+        <div class="section-title">👤 Basic Details</div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="fullName">Full Name</label>
+            <input id="fullName" class="input" type="text" placeholder="e.g., Ravi JayaBrath" />
+            <small class="error" id="errFullName"></small>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" class="input" type="email" placeholder="e.g., ravi34@gmail.com" />
+            <small class="error" id="errEmail"></small>
+          </div>
+
+          <!-- ✅ ROLE (CUSTOM DROPDOWN - FIXED) -->
+          <div class="field">
+            <label>Role</label>
+
+            <!-- this hidden input stores the selected value for validation + saving -->
+            <input type="hidden" id="roleValue" value="">
+
+            <div class="custom-select full" id="roleDropdown">
+              <button type="button" class="select-btn" id="roleBtn">
+                <span id="roleLabel">Select role</span>
+                <span class="chev">▾</span>
+              </button>
+
+              <div class="select-menu" id="roleMenu">
+                <button type="button" class="select-item" data-value="Admin">Admin</button>
+                <button type="button" class="select-item" data-value="Architect">Architect</button>
+                <button type="button" class="select-item" data-value="Client">Client</button>
+                <button type="button" class="select-item" data-value="Team Member">Team Member</button>
+              </div>
+            </div>
+
+            <small class="error" id="errRole"></small>
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone</label>
+            <input id="phone" class="input" type="tel" placeholder="e.g., 07XXXXXXXX" />
+            <small class="error" id="errPhone"></small>
+          </div>
+        </div>
+
+        <div class="section-title">🔒 Security</div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-wrap">
+              <input id="password" class="input" type="password" placeholder="Minimum 8 characters" />
+              <button type="button" class="eye-btn" id="togglePassword" aria-label="Toggle password">👁</button>
+            </div>
+            <small class="hint">Min 8 characters (required when creating). Optional when editing.</small>
+            <small class="error" id="errPassword"></small>
+          </div>
+
+          <div class="field">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="password-wrap">
+              <input id="confirmPassword" class="input" type="password" placeholder="Re-type password" />
+              <button type="button" class="eye-btn" id="toggleConfirmPassword" aria-label="Toggle confirm password">👁</button>
+            </div>
+            <small class="error" id="errConfirmPassword"></small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn primary" id="submitBtn">Save User</button>
+          <button type="button" class="btn ghost" id="resetBtn">Reset</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ✅ List -->
+    <section class="card list-card">
+      <div class="list-header">
+        <h2>Saved Users</h2>
+        <div class="count" id="userCount">0 users</div>
+      </div>
+
+      <div id="emptyState" class="empty">
+        <div class="empty-icon">📁</div>
+        <h3>No users yet</h3>
+        <p>Add a user using the form to see records here.</p>
+      </div>
+
+      <div id="userList" class="user-list"></div>
+    </section>
+  </main>
+
+  <!-- ✅ Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="toast-dot" id="toastDot"></div>
+    <div class="toast-content">
+      <div class="toast-title" id="toastTitle">Success</div>
+      <div class="toast-msg" id="toastMsg">User saved successfully</div>
+    </div>
+    <button class="toast-close" id="toastClose" aria-label="Close">✕</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
